@@ -1,0 +1,38 @@
+name: dl_ba
+channels:
+  - pytorch
+  - nvidia
+  - huggingface
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pytorch
+  - torchvision
+  - torchaudio
+  - cudatoolkit=11.4  
+  - transformers
+  - datasets
+  - huggingface_hub
+  - evaluate
+  - pip
+  - sentencepiece
+  - pydantic
+  - python-dotenv
+  - black
+  - isort
+  - tqdm
+  - wandb
+  - pandas
+  - matplotlib
+  - accelerate
+  - scikit-learn
+  - pytdc
+  - pynvml
+  - jupyter
+  - pip:
+    - deepspeed
+    - peft
+    - tokenizers==0.13.3
+    - pydantic==1.10.12  
+    - info-nce-pytorch
