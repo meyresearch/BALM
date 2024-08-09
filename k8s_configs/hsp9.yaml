@@ -1,0 +1,28 @@
+accelerate_config: configs/accelerate/deepspeed.yaml
+env_vars:
+  GIT_TOKEN:
+    secret_name: aryo-secrets
+    key: aryo-git-token
+  WANDB_API_KEY:
+    secret_name: aryo-secrets
+    key: aryo-wandb-api-key
+  HF_DOWNLOAD_TOKEN:
+    secret_name: aryo-secrets
+    key: aryo-hf-download-token
+  HF_UPLOAD_TOKEN:
+    secret_name: aryo-secrets
+    key: aryo-hf-upload-token
+  HF_USERNAME:
+    secret_name: aryo-secrets
+    key: aryo-hf-username
+image: aryopg/dl_ba:latest
+configs:
+  - config_filepath: configs/random_seed_experiments/hsp9/esm_lokr_chemberta_loha_cosinemse_train0_1.yaml
+    gpu_limit: 1
+    gpu_product: NVIDIA-A100-SXM4-40GB
+  - config_filepath: configs/random_seed_experiments/hsp9/esm_lokr_chemberta_loha_cosinemse_train0_2.yaml
+    gpu_limit: 1
+    gpu_product: NVIDIA-A100-SXM4-40GB
+  - config_filepath: configs/random_seed_experiments/hsp9/esm_lokr_chemberta_loha_cosinemse_train0_3.yaml
+    gpu_limit: 1
+    gpu_product: NVIDIA-A100-SXM4-40GB

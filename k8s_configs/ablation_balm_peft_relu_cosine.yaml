@@ -1,0 +1,31 @@
+accelerate_config: configs/accelerate/deepspeed.yaml
+env_vars:
+  GIT_TOKEN:
+    secret_name: aryo-secrets
+    key: aryo-git-token
+  WANDB_API_KEY:
+    secret_name: aryo-secrets
+    key: aryo-wandb-api-key
+  HF_DOWNLOAD_TOKEN:
+    secret_name: aryo-secrets
+    key: aryo-hf-download-token
+  HF_UPLOAD_TOKEN:
+    secret_name: aryo-secrets
+    key: aryo-hf-upload-token
+  HF_USERNAME:
+    secret_name: aryo-secrets
+    key: aryo-hf-username
+image: aryopg/dl_ba:latest
+configs:
+  - config_filepath: configs/manual_hpo_experiments/bindingdb_cold_target/esm_chemberta_proj_tuning_cosinemse_dropout_00_balanced_mse_relu_256.yaml
+    gpu_limit: 1
+    gpu_product: NVIDIA-A100-SXM4-40GB
+  - config_filepath: configs/manual_hpo_experiments/bindingdb_cold_target/esm_chemberta_proj_tuning_cosinemse_dropout_00_relu_256.yaml
+    gpu_limit: 1
+    gpu_product: NVIDIA-A100-SXM4-40GB
+  - config_filepath: configs/manual_hpo_experiments/bindingdb_random/esm_chemberta_proj_tuning_cosinemse_dropout_00_balanced_mse_relu_256.yaml
+    gpu_limit: 1
+    gpu_product: NVIDIA-A100-SXM4-40GB
+  - config_filepath: configs/manual_hpo_experiments/bindingdb_random/esm_chemberta_proj_tuning_cosinemse_dropout_00_relu_256.yaml
+    gpu_limit: 1
+    gpu_product: NVIDIA-A100-SXM4-40GB

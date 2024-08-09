@@ -1,0 +1,44 @@
+model_configs:
+  protein_model_name_or_path: facebook/esm2_t30_150M_UR50D
+  drug_model_name_or_path: "DeepChem/ChemBERTa-77M-MTR"
+  checkpoint_path: aryopg/bdb-r-esm-lokr-chemberta-loha-cosinemse
+  model_hyperparameters:
+    learning_rate: 0.1
+    warmup_steps_ratio: 0.06
+    protein_max_seq_len: 1200
+    drug_max_seq_len: 512
+    gradient_accumulation_steps: 32
+    projected_size: 256
+    projected_dropout: 0.0
+  protein_fine_tuning_type: lokr
+  protein_peft_hyperparameters:
+    r: 16
+    alpha: 32
+    rank_dropout: 0.0
+    module_dropout: 0.0
+    target_modules:
+      - key
+      - query
+      - value
+  drug_fine_tuning_type: loha
+  drug_peft_hyperparameters:
+    r: 16
+    alpha: 32
+    rank_dropout: 0.0
+    module_dropout: 0.0
+    target_modules:
+      - key
+      - query
+      - value
+  loss_function: cosine_mse
+dataset_configs:
+  dataset_name: USP7
+  split_method: original
+  train_ratio: 0.4
+  harmonize_affinities_mode: max_affinity
+training_configs:
+  random_seed: 123
+  device: 0
+  epochs: 50
+  batch_size: 4
+  outputs_dir: "outputs"

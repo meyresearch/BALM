@@ -1,0 +1,106 @@
+accelerate_config: configs/accelerate/deepspeed.yaml
+env_vars:
+  GIT_TOKEN:
+    secret_name: aryo-secrets
+    key: aryo-git-token
+  WANDB_API_KEY:
+    secret_name: aryo-secrets
+    key: aryo-wandb-api-key
+  HF_DOWNLOAD_TOKEN:
+    secret_name: aryo-secrets
+    key: aryo-hf-download-token
+  HF_UPLOAD_TOKEN:
+    secret_name: aryo-secrets
+    key: aryo-hf-upload-token
+  HF_USERNAME:
+    secret_name: aryo-secrets
+    key: aryo-hf-username
+image: aryopg/dl_ba:latest
+configs:
+  - config_filepath: configs/random_seed_experiments/mpro/esm_lokr_chemberta_loha_cosinemse_train0_1.yaml
+    gpu_limit: 1
+    gpu_product: NVIDIA-A100-SXM4-40GB
+  - config_filepath: configs/random_seed_experiments/mpro/esm_lokr_chemberta_loha_cosinemse_train10_1.yaml
+    gpu_limit: 1
+    gpu_product: NVIDIA-A100-SXM4-40GB
+  - config_filepath: configs/random_seed_experiments/mpro/esm_lokr_chemberta_loha_cosinemse_train20_1.yaml
+    gpu_limit: 1
+    gpu_product: NVIDIA-A100-SXM4-40GB
+  - config_filepath: configs/random_seed_experiments/mpro/esm_lokr_chemberta_loha_cosinemse_train30_1.yaml
+    gpu_limit: 1
+    gpu_product: NVIDIA-A100-SXM4-40GB
+  - config_filepath: configs/random_seed_experiments/mpro/esm_lokr_chemberta_loha_cosinemse_train40_1.yaml
+    gpu_limit: 1
+    gpu_product: NVIDIA-A100-SXM4-40GB
+  # - config_filepath: configs/random_seed_experiments/mpro/esm_lokr_chemberta_loha_cosinemse_train40_11.yaml
+  #   gpu_limit: 1
+  #   gpu_product: NVIDIA-A100-SXM4-40GB
+
+  # - config_filepath: configs/random_seed_experiments/mpro/esm_chemberta_loha_cosinemse_train40_12.yaml
+  #   gpu_limit: 1
+  #   gpu_product: NVIDIA-A100-SXM4-40GB
+  - config_filepath: configs/random_seed_experiments/mpro/esm_chemberta_cosinemse_train40_12.yaml
+    gpu_limit: 1
+    gpu_product: NVIDIA-A100-SXM4-40GB
+
+  # - config_filepath: configs/random_seed_experiments/mpro/esm_lokr_chemberta_loha_cosinemse_train30_12.yaml
+  #   gpu_limit: 1
+  #   gpu_product: NVIDIA-A100-SXM4-40GB
+
+  # - config_filepath: configs/random_seed_experiments/mpro/esm_lokr_chemberta_loha_cosinemse_train30_12_leakypdb.yaml
+  #   gpu_limit: 1
+  #   gpu_product: NVIDIA-A100-SXM4-40GB
+  # - config_filepath: configs/random_seed_experiments/mpro/esm_lokr_chemberta_loha_cosinemse_train30_11.yaml
+  #   gpu_limit: 1
+  #   gpu_product: NVIDIA-A100-SXM4-40GB
+
+  # - config_filepath: configs/random_seed_experiments/mpro/esm_lokr_chemberta_loha_cosinemse_train40_1.yaml
+  #   gpu_limit: 1
+  #   gpu_product: NVIDIA-A100-SXM4-40GB
+
+  - config_filepath: configs/random_seed_experiments/mpro/esm_lokr_chemberta_loha_cosinemse_train50_1.yaml
+    gpu_limit: 1
+    gpu_product: NVIDIA-A100-SXM4-40GB
+  - config_filepath: configs/random_seed_experiments/mpro/esm_lokr_chemberta_loha_cosinemse_train70_12.yaml
+    gpu_limit: 1
+    gpu_product: NVIDIA-A100-SXM4-40GB
+  # - config_filepath: configs/random_seed_experiments/mpro/esm_lokr_chemberta_loha_cosinemse_train70_12_leakypdb.yaml
+  #   gpu_limit: 1
+  #   gpu_product: NVIDIA-A100-SXM4-40GB
+
+  # - config_filepath: configs/random_seed_experiments/mpro/esm_lokr_chemberta_loha_cosinemse_train0_2.yaml
+  #   gpu_limit: 1
+  #   gpu_product: NVIDIA-A100-SXM4-40GB
+  # - config_filepath: configs/random_seed_experiments/mpro/esm_lokr_chemberta_loha_cosinemse_train10_2.yaml
+  #   gpu_limit: 1
+  #   gpu_product: NVIDIA-A100-SXM4-40GB
+  # - config_filepath: configs/random_seed_experiments/mpro/esm_lokr_chemberta_loha_cosinemse_train20_2.yaml
+  #   gpu_limit: 1
+  #   gpu_product: NVIDIA-A100-SXM4-40GB
+  # - config_filepath: configs/random_seed_experiments/mpro/esm_lokr_chemberta_loha_cosinemse_train30_2.yaml
+  #   gpu_limit: 1
+  #   gpu_product: NVIDIA-A100-SXM4-40GB
+  # - config_filepath: configs/random_seed_experiments/mpro/esm_lokr_chemberta_loha_cosinemse_train40_2.yaml
+  #   gpu_limit: 1
+  #   gpu_product: NVIDIA-A100-SXM4-40GB
+  # - config_filepath: configs/random_seed_experiments/mpro/esm_lokr_chemberta_loha_cosinemse_train50_2.yaml
+  #   gpu_limit: 1
+  #   gpu_product: NVIDIA-A100-SXM4-40GB
+  # - config_filepath: configs/random_seed_experiments/mpro/esm_lokr_chemberta_loha_cosinemse_train0_3.yaml
+  #   gpu_limit: 1
+  #   gpu_product: NVIDIA-A100-SXM4-40GB
+  # - config_filepath: configs/random_seed_experiments/mpro/esm_lokr_chemberta_loha_cosinemse_train10_3.yaml
+  #   gpu_limit: 1
+  #   gpu_product: NVIDIA-A100-SXM4-40GB
+  # - config_filepath: configs/random_seed_experiments/mpro/esm_lokr_chemberta_loha_cosinemse_train20_3.yaml
+  #   gpu_limit: 1
+  #   gpu_product: NVIDIA-A100-SXM4-40GB
+  # - config_filepath: configs/random_seed_experiments/mpro/esm_lokr_chemberta_loha_cosinemse_train30_3.yaml
+  #   gpu_limit: 1
+  #   gpu_product: NVIDIA-A100-SXM4-40GB
+  # - config_filepath: configs/random_seed_experiments/mpro/esm_lokr_chemberta_loha_cosinemse_train40_3.yaml
+  #   gpu_limit: 1
+  #   gpu_product: NVIDIA-A100-SXM4-40GB
+  # - config_filepath: configs/random_seed_experiments/mpro/esm_lokr_chemberta_loha_cosinemse_train50_3.yaml
+  #   gpu_limit: 1
+  #   gpu_product: NVIDIA-A100-SXM4-40GB
