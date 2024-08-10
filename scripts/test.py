@@ -16,12 +16,12 @@ from datasets import Dataset
 from torch.utils.data import DataLoader
 from transformers import AutoTokenizer
 
-from dl_ba import common_utils
-from dl_ba.configs import Configs
-from dl_ba.dataset import DataCollatorWithPadding
-from dl_ba.metrics import get_ci, get_pearson, get_rmse, get_spearman
-from dl_ba.model import BindingAffinityModel
-from dl_ba.tokenization import pre_tokenize_unique_entities, tokenize_with_lookup
+from balm import common_utils
+from balm.configs import Configs
+from balm.dataset import DataCollatorWithPadding
+from balm.metrics import get_ci, get_pearson, get_rmse, get_spearman
+from balm.model import BindingAffinityModel
+from balm.tokenization import pre_tokenize_unique_entities, tokenize_with_lookup
 
 # This script only cater
 #
@@ -123,8 +123,6 @@ def load_data(
         df,
         protein_tokenizer,
         drug_tokenizer,
-        protein_max_seq_len,
-        drug_max_seq_len,
     )
 
     dataset = Dataset.from_pandas(df).map(

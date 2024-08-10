@@ -8,9 +8,9 @@ from dotenv import load_dotenv
 
 load_dotenv("env/.env")
 
-from dl_ba import common_utils
-from dl_ba.configs import Configs
-from dl_ba.trainer import Trainer
+from balm import common_utils
+from balm.configs import Configs
+from balm.trainer import Trainer
 
 
 def argument_parser():
@@ -31,8 +31,8 @@ def main() -> None:
     common_utils.save_training_configs(configs, outputs_dir)
 
     # Login to WandB
-    wandb_entity = "llm-for-health"  #  os.getenv("WANDB_ENTITY", "")
-    wandb_project = "BALM"  #  os.getenv("WANDB_PROJECT_NAME", "")
+    wandb_entity = os.getenv("WANDB_ENTITY", "")
+    wandb_project = os.getenv("WANDB_PROJECT_NAME", "")
 
     trainer = Trainer(configs, wandb_entity, wandb_project, outputs_dir)
     # train_ratio is only useful for Mpro, the rest will be null
