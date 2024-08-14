@@ -9,12 +9,15 @@ from balm.models.base_model import BaseModel
 
 class BaselineModel(BaseModel):
     """
-    Baseline model for protein-drug interaction prediction.
+    BaselineModel model extends BaseModel to concatenate protein and ligand encodings.
+    This model takes the embeddings from both the protein and ligand models, concatenates them, and processes them further.
 
-    Args:
-        model_configs (ModelConfigs): Configuration object for the model.
-        protein_embedding_size (int, optional): Size of the protein embedding. Defaults to 640.
-        drug_embedding_size (int, optional): Size of the drug embedding. Defaults to 384.
+    Attributes:
+        model_configs (ModelConfigs): The configuration object for the model.
+        protein_model (AutoModel): The pre-trained protein model.
+        drug_model (AutoModel): The pre-trained drug model.
+        protein_embedding_size (int): The size of the protein model embeddings.
+        drug_embedding_size (int): The size of the drug model embeddings.
     """
 
     def __init__(
@@ -41,14 +44,16 @@ class BaselineModel(BaseModel):
 
     def forward(self, batch_input, **kwargs):
         """
-        Forward pass of the model.
+        Forward pass for the BaselineModel.
+
+        This method takes the input for both protein and drug models, obtains their embeddings, concatenates them, and processes them further.
 
         Args:
-            batch_input (dict): Input batch containing protein and drug input IDs and attention masks.
-            **kwargs: Additional keyword arguments.
+            protein_input (torch.Tensor): The input tensor for the protein model.
+            drug_input (torch.Tensor): The input tensor for the drug model.
 
         Returns:
-            dict: Dictionary containing the forward output, including protein and drug embeddings, and logits.
+            torch.Tensor: The output tensor after processing the concatenated embeddings.
         """
         forward_output = {}
 

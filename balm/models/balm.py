@@ -28,9 +28,9 @@ def get_peft_config(peft_type):
 
 
 class BALM(BaseModel):
+    
     """
-    A class representing the Binding Affinity Model.
-
+    BALM Model using the protein and ligand laguage models and projecting them to a common space using cosine loss.
     Args:
         model_configs (ModelConfigs): The configuration object for the model.
         protein_embedding_size (int): The size of the protein embedding. Default is 640.
