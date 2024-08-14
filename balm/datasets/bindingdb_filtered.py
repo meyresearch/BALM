@@ -14,13 +14,13 @@ def create_scaffold_split_dti(df, seed, frac, drug_column):
     and then split based on scaffolds while considering the drug-target pairs.
 
     Args:
-        df (pd.DataFrame): dataset dataframe with drug-target interactions
-        seed (int): the random seed
-        frac (list): a list of train/valid/test fractions
-        drug_column (str): the column name where drug molecules (SMILES) are stored
+        df (pd.DataFrame): Dataset dataframe with drug-target interactions.
+        seed (int): The random seed.
+        frac (list): A list of train/valid/test fractions, e.g., [0.7, 0.2, 0.1].
+        drug_column (str): The column name where drug molecules (SMILES) are stored.
 
     Returns:
-        dict: a dictionary of split dataframes (train/valid/test)
+        dict: A dictionary of split dataframes with keys 'train', 'valid', and 'test'.
     """
 
     random = Random(seed)
@@ -67,7 +67,25 @@ def create_scaffold_split_dti(df, seed, frac, drug_column):
 
 
 class BindingDBDataset:
+    """
+    A class to represent the BindingDB dataset for drug-target interactions.
+
+    Attributes:
+        filepath (str): The path to the BindingDB dataset CSV file.
+        data (pd.DataFrame): The processed dataset.
+        y (np.ndarray): The target values from the dataset.
+
+    Methods:
+        get_split(method, frac, seed, column_name): Returns the dataset split according to the specified method.
+    """
+
     def __init__(self, filepath="data/BindingDB_filtered.csv"):
+        """
+        Initialize the BindingDBDataset object by loading and processing the dataset.
+
+        Args:
+            filepath (str): The path to the dataset file.
+        """
         self.filepath = filepath
         self.data = pd.read_csv(filepath)
         self.data = self.data.dropna(subset=["Drug"]).reset_index(drop=True)
@@ -80,7 +98,17 @@ class BindingDBDataset:
 
     @staticmethod
     def _create_random_split(df, fold_seed, frac):
-        """Create random split."""
+        """
+        Create a random split of the dataset into train, validation, and test sets.
+
+        Args:
+            df (pd.DataFrame): The dataset to split.
+            fold_seed (int): The random seed.
+            frac (list): A list of train/valid/test fractions, e.g., [0.7, 0.2, 0.1].
+
+        Returns:
+            dict: A dictionary of split dataframes with keys 'train', 'valid', and 'test'.
+        """
         _, val_frac, test_frac = frac
         test = df.sample(frac=test_frac, replace=False, random_state=fold_seed)
         train_val = df[~df.index.isin(test.index)]
@@ -97,7 +125,19 @@ class BindingDBDataset:
     
     @staticmethod
     def _create_fold_setting_cold(df, fold_seed, frac, entities):
-        """Create cold-split where given one or multiple columns, it first splits based on entities in the columns and then maps all associated data points to the partition."""
+        """
+        Create a cold-split for the dataset, ensuring that specific entities
+        (e.g., drugs or targets) are exclusive to one of the train, validation, or test sets.
+
+        Args:
+            df (pd.DataFrame): The dataset to split.
+            fold_seed (int): The random seed.
+            frac (list): A list of train/valid/test fractions, e.g., [0.7, 0.2, 0.1].
+            entities (str or list): The column(s) to base the cold split on.
+
+        Returns:
+            dict: A dictionary of split dataframes with keys 'train', 'valid', and 'test'.
+        """
         if isinstance(entities, str):
             entities = [entities]
 
@@ -156,6 +196,18 @@ class BindingDBDataset:
     def get_split(
         self, method="random", frac=[0.7, 0.2, 0.1], seed=42, column_name="Drug"
     ) -> Dict[str, pd.DataFrame]:
+        """
+        Get a dataset split based on the specified method.
+
+        Args:
+            method (str): The split method ('random', 'scaffold', 'cold_drug', 'cold_target').
+            frac (list): A list of train/valid/test fractions, e.g., [0.7, 0.2, 0.1].
+            seed (int): The random seed.
+            column_name (str): The column name to base the split on (used in scaffold split).
+
+        Returns:
+            dict: A dictionary of split dataframes with keys 'train', 'valid', and 'test'.
+        """
         if method == "random":
             return self._create_random_split(self.data, seed, frac)
         elif method == "scaffold":
