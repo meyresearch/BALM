@@ -16,7 +16,7 @@ def load_trained_model(model: BaseModel, model_configs: ModelConfigs, is_trainin
     checkpoint_path = hf_hub_download(
         repo_id=model_configs.checkpoint_path,
         filename="pytorch_model.bin",
-        token=os.getenv("HF_DOWNLOAD_TOKEN"),
+        token=os.getenv("HF_TOKEN"),
     )
 
     checkpoint = torch.load(

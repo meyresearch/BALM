@@ -85,19 +85,12 @@ class BALM(BaseModel):
         self._set_pooler_layer_to_trainable()
 
         self.loss_fn_type = model_configs.loss_function
-        self.loss_fn = self._set_loss()
+        self.loss_fn = nn.MSELoss()
 
-    def _set_loss(self):
-        """
-        Set the loss function based on the loss function type specified in the model configurations.
-
-        Returns:
-            nn.Module: The loss function module.
-        """
-        if self.loss_fn_type == "cosine_mse":
-            return nn.MSELoss()
-        else:
-            raise NotImplementedError(f"Loss function {self.loss_fn_type} not implemented")
+    @staticmethod
+    def cosine_similarity_to_pkd(cosine_similarity, pkd_upper_bound, pkd_lower_bound):
+        pkd_range = pkd_upper_bound - pkd_lower_bound
+        return (cosine_similarity + 1) / 2 * pkd_range + pkd_lower_bound
 
     def forward(self, batch_input, **kwargs):
         """
@@ -131,10 +124,11 @@ class BALM(BaseModel):
             drug_embedding = F.relu(drug_embedding)
 
         cosine_similarity = F.cosine_similarity(protein_embedding, drug_embedding)
-        if batch_input["labels"] is not None:
-            forward_output["loss"] = self.loss_fn(
-                cosine_similarity, batch_input["labels"]
-            )
+        if "labels" in batch_input:
+            if batch_input["labels"] is not None:
+                forward_output["loss"] = self.loss_fn(
+                    cosine_similarity, batch_input["labels"]
+                )
 
         forward_output["cosine_similarity"] = cosine_similarity
         forward_output["protein_embedding"] = protein_embedding
