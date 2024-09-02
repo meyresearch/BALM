@@ -1,6 +1,5 @@
 import os
 from typing import Union
-
 import pandas as pd
 import torch
 from accelerate import Accelerator
@@ -9,11 +8,7 @@ from datasets import Dataset
 from torch.optim import AdamW
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from transformers import (
-    AutoTokenizer,
-    get_linear_schedule_with_warmup,
-)
-
+from transformers import AutoTokenizer, get_linear_schedule_with_warmup
 import wandb
 
 from balm.configs import Configs
@@ -27,9 +22,31 @@ from balm import factories
 
 
 class Trainer:
+    """
+    The Trainer class handles the training, validation, and testing processes for the models.
+    It supports setting up datasets, initializing models, and managing the training loop with
+    early stopping and learning rate scheduling.
+
+    Attributes:
+        configs (Configs): Configuration object with all necessary hyperparameters and settings.
+        wandb_entity (str): Weights & Biases entity name.
+        wandb_project (str): Weights & Biases project name.
+        outputs_dir (str): Directory where output files such as checkpoints and logs are saved.
+    """
+
     def __init__(
         self, configs: Configs, wandb_entity: str, wandb_project: str, outputs_dir: str
     ):
+        """
+        Initialize the Trainer with the provided configurations, Weights & Biases settings, 
+        and output directory.
+
+        Args:
+            configs (Configs): Configuration object.
+            wandb_entity (str): Weights & Biases entity name.
+            wandb_project (str): Weights & Biases project name.
+            outputs_dir (str): Directory where outputs are saved.
+        """
         self.configs = configs
 
         self.gradient_accumulation_steps = (
@@ -46,8 +63,10 @@ class Trainer:
         self.wandb_entity = wandb_entity
         self.wandb_project = wandb_project
 
+        # Load the tokenizers for protein and drug sequences
         self.protein_tokenizer, self.drug_tokenizer = self._load_tokenizers()
 
+        # Determine which model to use based on fine-tuning type
         if (
             self.configs.model_configs.protein_fine_tuning_type == "baseline"
             and self.configs.model_configs.drug_fine_tuning_type == "baseline"
@@ -63,6 +82,12 @@ class Trainer:
         self._setup_run_name()
 
     def _load_tokenizers(self):
+        """
+        Load the tokenizers for protein and drug sequences based on the model paths.
+
+        Returns:
+            Tuple: (protein_tokenizer, drug_tokenizer)
+        """
         protein_tokenizer = AutoTokenizer.from_pretrained(
             self.configs.model_configs.protein_model_name_or_path
         )
@@ -73,10 +98,17 @@ class Trainer:
         return protein_tokenizer, drug_tokenizer
 
     def set_pkd_bounds(self, dataset):
+        """
+        Set the pKd bounds for scaling the labels in the dataset. If a checkpoint is loaded 
+        for a zero-shot experiment, the bounds are loaded from the checkpoint.
+
+        Args:
+            dataset (Dataset): The dataset containing the pKd labels.
+        """
         self.pkd_lower_bound = min(dataset.y)
         self.pkd_upper_bound = max(dataset.y)
 
-        # If we are loading a trained model for a zero-shot experiment, load the pkd bounds from the training (at the moment, it's manually collected)
+        # Load pKd bounds from a trained model if performing a zero-shot experiment
         if self.configs.model_configs.checkpoint_path:
             if self.configs.dataset_configs.train_ratio == 0.0:
                 self.pkd_lower_bound, self.pkd_upper_bound = load_pretrained_pkd_bounds(self.configs.model_configs.checkpoint_path)
@@ -86,17 +118,25 @@ class Trainer:
         )
 
     def set_dataset(self, *args, **kwargs) -> dict:
+        """
+        Prepare and set up the dataset for training, validation, and testing. This includes
+        pre-tokenization, filtering based on sequence length, and setting up DataLoaders.
+
+        Returns:
+            dict: Dictionary containing the dataset splits (train, valid, test).
+        """
         dataset = factories.get_dataset(self.configs.dataset_configs.dataset_name)
 
         print(
             f"Training with {self.configs.model_configs.loss_function} loss function."
         )
 
+        # Apply pKd scaling if using cosine MSE loss
         if self.configs.model_configs.loss_function == "cosine_mse":
             self.set_pkd_bounds(dataset)
 
             if self.pkd_upper_bound == self.pkd_lower_bound:
-                # To handle the hacky case where all labels are the same
+                # Handle case where all labels are the same
                 dataset.y = [0 for _ in dataset.y]
             else:
                 dataset.y = [
@@ -106,10 +146,9 @@ class Trainer:
                     - 1
                     for pkd in dataset.y
                 ]
-            # Unique preprocessing for non-TDC dataset, preprocess Y column using the same pkd scaling
+            # Preprocess Y column for non-TDC datasets using the same pKd scaling
             if not self.configs.dataset_configs.dataset_name.startswith("DTI_"):
                 if self.pkd_upper_bound == self.pkd_lower_bound:
-                    # To handle the case where all labels are the same
                     dataset.data["Y"] = dataset.data["Y"].apply(lambda x: 0)
                 else:
                     dataset.data["Y"] = dataset.data["Y"].apply(
@@ -121,6 +160,7 @@ class Trainer:
         elif self.configs.model_configs.loss_function in ["baseline_mse"]:
             print("Using original pKd")
 
+        # Filter the dataset by sequence length
         print("Filtering dataset by length")
         print(f"Protein max length: {self.protein_max_seq_len}")
         print(f"Drug max length: {self.drug_max_seq_len}")
@@ -137,7 +177,7 @@ class Trainer:
                 self.drug_tokenizer,
             )
 
-            # Use the optimized tokenization for this split
+            # Tokenize the dataset and filter by sequence length
             dataset = Dataset.from_pandas(data_df).map(
                 lambda x: tokenize_with_lookup(
                     x, protein_tokenized_dict, drug_tokenized_dict
@@ -157,6 +197,7 @@ class Trainer:
             )
             dataset_splits[split] = dataset
 
+        # Create data collator to handle padding during batching
         data_collator = DataCollatorWithPadding(
             protein_tokenizer=self.protein_tokenizer,
             drug_tokenizer=self.drug_tokenizer,
@@ -166,6 +207,7 @@ class Trainer:
             return_tensors="pt",
         )
 
+        # Setup DataLoaders for train, valid, and test splits
         if "train" in dataset_splits:
             print(f"Setup Train DataLoader")
             self.train_dataloader = DataLoader(
@@ -194,28 +236,26 @@ class Trainer:
         )
 
     def _setup_run_name(self):
+        """
+        Setup the run name and group name for the Weights & Biases tracker based on
+        the dataset, split method, and model hyperparameters.
+        """
         protein_peft_hyperparameters = (
             self.configs.model_configs.protein_peft_hyperparameters
         )
         drug_peft_hyperparameters = self.configs.model_configs.drug_peft_hyperparameters
 
-        # Group name depends on the dataset and split
+        # Group name depends on the dataset and split method
         self.group_name = f"{self.configs.dataset_configs.dataset_name}_{self.configs.dataset_configs.split_method}"
 
-        # Run name depends on the hyperparameters
-        ## Get hyperparameters
-        protein_model_fine_tuning_type = (
-            self.configs.model_configs.protein_fine_tuning_type
-        )
-        drug_model_fine_tuning_type = self.configs.model_configs.drug_fine_tuning_type
-
+        # Run name depends on the fine-tuning type and other relevant hyperparameters
         hyperparams = []
-        hyperparams += [f"protein_{protein_model_fine_tuning_type}"]
+        hyperparams += [f"protein_{self.configs.model_configs.protein_fine_tuning_type}"]
         if protein_peft_hyperparameters:
             for key, value in protein_peft_hyperparameters.items():
                 if key not in ["target_modules", "feedforward_modules"]:
                     hyperparams += [f"{key}_{value}"]
-        hyperparams += [f"drug_{drug_model_fine_tuning_type}"]
+        hyperparams += [f"drug_{self.configs.model_configs.drug_fine_tuning_type}"]
         if drug_peft_hyperparameters:
             for key, value in drug_peft_hyperparameters.items():
                 if key not in ["target_modules", "feedforward_modules"]:
@@ -223,6 +263,10 @@ class Trainer:
         self.run_name = "_".join(hyperparams)
 
     def setup_training(self):
+        """
+        Setup the training environment, including initializing the Accelerator, WandB tracker, 
+        optimizer, and learning rate scheduler. Prepares the model and dataloaders for training.
+        """
         self.accelerator = Accelerator(
             gradient_accumulation_steps=self.gradient_accumulation_steps,
             log_with="wandb",
@@ -244,7 +288,7 @@ class Trainer:
         self.accelerator.wait_for_everyone()
 
         if self.train_dataloader is not None:
-            # optimizer
+            # Initialize optimizer with parameters that require gradients
             self.optimizer = AdamW(
                 params=[
                     param
@@ -255,16 +299,8 @@ class Trainer:
                 lr=self.configs.model_configs.model_hyperparameters.learning_rate,
             )
 
-            if self.configs.model_configs.loss_function in ["cosine_balanced_mse"]:
-                self.optimizer.add_param_group(
-                    {
-                        "params": self.model.loss_fn.noise_sigma,
-                        "lr": self.configs.model_configs.model_hyperparameters.sigma_lr,
-                        "name": "noise_sigma",
-                    }
-                )
 
-            # lr scheduler
+            # Setup learning rate scheduler
             num_training_steps = (
                 len(self.train_dataloader) * self.configs.training_configs.epochs
             )
@@ -277,6 +313,7 @@ class Trainer:
                 num_training_steps=num_training_steps,
             )
 
+            # Prepare model, dataloaders, optimizer, and scheduler for training
             (
                 self.model,
                 self.train_dataloader,
@@ -293,6 +330,7 @@ class Trainer:
                 self.lr_scheduler,
             )
         else:
+            # If only testing, prepare the model and test dataloader
             (
                 self.model,
                 self.test_dataloader,
@@ -301,14 +339,25 @@ class Trainer:
                 self.test_dataloader,
             )
 
+        # Load a trained model from checkpoint if specified
         if self.configs.model_configs.checkpoint_path:
             load_trained_model(self.model, self.configs.model_configs, is_training=self.train_dataloader is not None)
 
     def compute_metrics(self, labels, predictions):
+        """
+        Compute evaluation metrics including RMSE, Pearson, Spearman, and CI.
+
+        Args:
+            labels (Tensor): True labels.
+            predictions (Tensor): Predicted values.
+
+        Returns:
+            dict: Dictionary containing the computed metrics.
+        """
         if self.configs.model_configs.loss_function in [
-            "cosine_mse",
-            "cosine_balanced_mse",
+            "cosine_mse"
         ]:
+            # Rescale predictions and labels back to the original pKd range
             pkd_range = self.pkd_upper_bound - self.pkd_lower_bound
             labels = (labels + 1) / 2 * pkd_range + self.pkd_lower_bound
             predictions = (predictions + 1) / 2 * pkd_range + self.pkd_lower_bound
@@ -326,6 +375,9 @@ class Trainer:
         }
 
     def train(self):
+        """
+        Execute the training loop, handling early stopping, checkpoint saving, and logging metrics.
+        """
         if self.train_dataloader is None:
             epoch = 0
             best_checkpoint_dir = None
@@ -357,7 +409,7 @@ class Trainer:
                         outputs = self.model(batch)
                         loss = outputs["loss"]
 
-                        # Backpropagate
+                        # Backpropagation
                         self.accelerator.backward(loss)
                         self.optimizer.step()
                         self.lr_scheduler.step()
@@ -377,7 +429,7 @@ class Trainer:
                     train_metrics = {
                         "train/loss": total_train_loss / len(self.train_dataloader)
                     }
-                # At the end of an epoch, compute metrics
+                # At the end of an epoch, compute validation metrics
                 valid_metrics = self.test("valid")
 
                 if valid_metrics:
@@ -404,18 +456,19 @@ class Trainer:
                     print(f"Early stopping triggered at epoch {epoch}")
                     break
 
+            # Reload the best model checkpoint
             if best_checkpoint_dir:
                 self.accelerator.load_state(
                     os.path.join(self.outputs_dir, "checkpoint", best_checkpoint_dir)
                 )
                 self.accelerator.wait_for_everyone()
 
+        # Compute test metrics and log results
         test_metrics = self.test("test", save_prediction=True)
         self.accelerator.log(test_metrics, step=epoch)
 
-        # FIXME: We may want to save the prediction of train and valid for all datasets
+        # For specific datasets, also save predictions for train and validation splits
         if self.configs.dataset_configs.dataset_name == "BindingDB_filtered":
-            # Monkey patch: Just for BindingDB cleaned, we want to check the prediction of train and validation
             train_metrics = self.test("train", save_prediction=True)
             self.accelerator.log(train_metrics, step=epoch)
             valid_metrics = self.test("valid", save_prediction=True)
@@ -430,6 +483,16 @@ class Trainer:
             wandb.log_artifact(artifact)
 
     def test(self, split: str, save_prediction=False):
+        """
+        Evaluate the model on the specified dataset split and optionally save predictions.
+
+        Args:
+            split (str): The dataset split to evaluate on ('train', 'valid', 'test').
+            save_prediction (bool): Whether to save the predictions as a CSV file.
+
+        Returns:
+            dict: Dictionary containing the evaluation metrics for the specified split.
+        """
         if split == "train":
             dataloader = self.train_dataloader
         elif split == "valid":
@@ -461,11 +524,11 @@ class Trainer:
                 loss = outputs["loss"]
                 total_loss += loss.detach().float()
 
+                # Collect predictions and labels for metric computation
                 all_proteins += batch["protein_ori_sequences"]
                 all_drugs += batch["drug_ori_sequences"]
                 if self.configs.model_configs.loss_function in [
-                    "cosine_mse",
-                    "cosine_balanced_mse",
+                    "cosine_mse"
                 ]:
                     all_labels += [batch["labels"]]
                     all_predictions += [outputs["cosine_similarity"]]
@@ -476,6 +539,7 @@ class Trainer:
             progress_bar.set_description(f"Eval: {split} split")
             progress_bar.update(1)
 
+        # Concatenate all predictions and labels across batches
         all_labels = torch.cat(all_labels, dim=0)
         all_predictions = torch.cat(all_predictions, dim=0)
         performance_metrics = self.compute_metrics(all_labels, all_predictions)
@@ -486,13 +550,13 @@ class Trainer:
             metrics[f"{split}/{metric_name}"] = metric_value
 
         if save_prediction:
+            # Save predictions and labels to a CSV file
             df = pd.DataFrame(columns=["protein", "drug", "label", "prediction"])
             df["protein"] = all_proteins
             df["drug"] = all_drugs
 
             if self.configs.model_configs.loss_function in [
-                "cosine_mse",
-                "cosine_balanced_mse",
+                "cosine_mse"
             ]:
                 pkd_range = self.pkd_upper_bound - self.pkd_lower_bound
                 all_labels = (all_labels + 1) / 2 * pkd_range + self.pkd_lower_bound
@@ -504,6 +568,7 @@ class Trainer:
             df["prediction"] = all_predictions.cpu().numpy().tolist()
             df.to_csv(os.path.join(self.outputs_dir, f"{split}_prediction.csv"))
 
+            # Log the predictions as a WandB artifact
             artifact = wandb.Artifact(f"{split}_prediction", type="prediction")
             artifact.add_file(os.path.join(self.outputs_dir, f"{split}_prediction.csv"))
             wandb.log_artifact(artifact)

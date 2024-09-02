@@ -7,7 +7,7 @@ from pydantic import BaseModel
 class FineTuningType(str, Enum):
     """
     baseline: Only for baseline model (Concatenated Embedding + linear projection)
-    projection: Common fine tuning technique: only tuning linear projection
+    projection: Common fine tuning technique: only tuning Linear projection
     """
 
     baseline = "baseline"

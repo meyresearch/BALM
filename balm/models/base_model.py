@@ -6,20 +6,20 @@ from balm.configs import ModelConfigs
 
 
 class BaseModel(nn.Module):
-    protein_model_embedding_size = {
-        "facebook/esm2_t30_150M_UR50D": 640,
-        "facebook/esm2_t33_650M_UR50D": 1280,
-    }
-    drug_model_embedding_size = {"DeepChem/ChemBERTa-77M-MTR": 384}
+    """
+    BaseModel integrates both protein and ligand laguage models.
+    
+    Attributes:
+        model_configs (ModelConfigs): The configuration object for the model.
+        protein_model (AutoModel): The pre-trained protein model.
+        drug_model (AutoModel): The pre-trained ligand model.
+        protein_embedding_size (int): The size of the protein model embeddings.
+        drug_embedding_size (int): The size of the drug model embeddings.
+    """
 
-    def __init__(
-        self,
-        model_configs: ModelConfigs,
-        protein_embedding_size: int,
-        drug_embedding_size: int,
-    ):
+    def __init__(self, model_configs):
         """
-        Initializes the BaseModel.
+        Initializes the BaseModel with the given configuration.
 
         Args:
             model_configs (ModelConfigs): The configuration object for the model.
@@ -52,7 +52,9 @@ class BaseModel(nn.Module):
         )
 
     def _set_pooler_layer_to_trainable(self):
-        # Manually set pooler layer to be trainable
+        """
+        Manually sets the pooler layer to be trainable for both protein and drug models.
+        """
         for name, param in self.protein_model.named_parameters():
             if "pooler.dense" in name:
                 param.requires_grad = True
@@ -61,6 +63,9 @@ class BaseModel(nn.Module):
                 param.requires_grad = True
 
     def print_trainable_params(self):
+        """
+        Prints the number of trainable parameters in the model.
+        """
         trainable_params = 0
         all_param = 0
         for name, param in self.named_parameters():
