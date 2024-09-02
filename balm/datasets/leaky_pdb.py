@@ -1,11 +1,12 @@
 import numpy as np
 import pandas as pd
 
+from datasets import load_dataset
+
 
 class LeakyPDBDataset:
-    def __init__(self, filepath="data/leaky_pdb.csv"):
-        self.filepath = filepath
-        self.data = pd.read_csv(filepath)
+    def __init__(self):
+        self.data = load_dataset("BALM/BALM-benchmark", "LeakyPDB", split="train").to_pandas()
 
         # Rename columns for consistency with TDC data
         # smiles -> Drug

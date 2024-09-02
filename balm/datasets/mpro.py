@@ -1,11 +1,12 @@
 import numpy as np
 import pandas as pd
 
+from datasets import load_dataset
+
 
 class MproDataset:
-    def __init__(self, train_ratio, filepath="data/Mpro_data.csv"):
-        self.filepath = filepath
-        self.data = pd.read_csv(filepath)
+    def __init__(self, train_ratio):
+        self.data = load_dataset("BALM/BALM-benchmark", "Mpro", split="train").to_pandas()
 
         self.y = self.data["Y"].values
 

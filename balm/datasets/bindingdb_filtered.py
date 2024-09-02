@@ -3,6 +3,7 @@ from random import Random
 from typing import Dict
 
 import pandas as pd
+from datasets import load_dataset
 from rdkit import Chem
 from rdkit.Chem.Scaffolds import MurckoScaffold
 
@@ -67,9 +68,9 @@ def create_scaffold_split_dti(df, seed, frac, drug_column):
 
 
 class BindingDBDataset:
-    def __init__(self, filepath="data/BindingDB_filtered.csv"):
-        self.filepath = filepath
-        self.data = pd.read_csv(filepath)
+    def __init__(self):
+        self.data = load_dataset("BALM/BALM-benchmark", "BindingDB_filtered", split="train").to_pandas()
+
         self.data = self.data.dropna(subset=["Drug"]).reset_index(drop=True)
         self.y = self.data["Y"].values
         self.data = (

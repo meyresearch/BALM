@@ -1,11 +1,12 @@
 import numpy as np
 import pandas as pd
 
+from datasets import load_dataset
+
 
 class HSP9Dataset:
-    def __init__(self, train_ratio, filepath="data/HSP9_data.csv"):
-        self.filepath = filepath
-        self.data = pd.read_csv(filepath)
+    def __init__(self, train_ratio):
+        self.data = load_dataset("BALM/BALM-benchmark", "HSP90", split="train").to_pandas()
 
         self.y = self.data["Y"].values
         self.train_ratio = train_ratio

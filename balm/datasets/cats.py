@@ -1,11 +1,12 @@
 import numpy as np
 import pandas as pd
 
+from datasets import load_dataset
+
 
 class CATSDataset:
     def __init__(self, train_ratio, filepath="data/CATS_data.csv"):
-        self.filepath = filepath
-        self.data = pd.read_csv(filepath)
+        self.data = load_dataset("BALM/BALM-benchmark", "CATS", split="train").to_pandas()
 
         self.y = self.data["Y"].values
         self.train_ratio = train_ratio
