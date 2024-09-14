@@ -131,6 +131,10 @@ def get_balm_embeddings(targets_list, ligands_list, target_tokenizer, ligand_tok
         protein_embeddings += [embedding.squeeze().detach().cpu().numpy() for embedding in predictions["protein_embedding"]]
         drug_embeddings += [embedding.squeeze().detach().cpu().numpy() for embedding in predictions["drug_embedding"]]
         cosine_similarities += [cos_sim.squeeze().detach().cpu().numpy() for cos_sim in predictions["cosine_similarity"]]
+
+    protein_embeddings = np.array(protein_embeddings)
+    drug_embeddings = np.array(drug_embeddings)
+    cosine_similarities = np.array(cosine_similarities)
     
     return protein_embeddings, drug_embeddings, cosine_similarities
 
@@ -324,6 +328,11 @@ def main():
         )
 
         target_embeddings, ligand_embeddings, cosine_similarities = get_balm_embeddings(targets, smiles, target_tokenizer, ligand_tokenizer, model)
+        
+        print("Target embeddings shape:", target_embeddings.shape)
+        print("Ligand embeddings shape:", ligand_embeddings.shape)
+        print("Cosine similarities shape:", cosine_similarities.shape)
+        
         if args.embedding_type == "BALM-ligand":
             X = ligand_embeddings
         if args.embedding_type == "BALM-concat":
