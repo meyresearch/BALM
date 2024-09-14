@@ -527,12 +527,10 @@ class Trainer:
                 # Collect predictions and labels for metric computation
                 all_proteins += batch["protein_ori_sequences"]
                 all_drugs += batch["drug_ori_sequences"]
-                if self.configs.model_configs.loss_function in [
-                    "cosine_mse"
-                ]:
+                if self.configs.model_configs.loss_function == "cosine_mse":
                     all_labels += [batch["labels"]]
                     all_predictions += [outputs["cosine_similarity"]]
-                elif self.configs.model_configs.loss_function in ["baseline_mse"]:
+                elif self.configs.model_configs.loss_function == "baseline_mse":
                     all_labels += [batch["labels"]]
                     all_predictions += [outputs["logits"]]
 
