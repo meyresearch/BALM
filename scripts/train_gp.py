@@ -329,14 +329,6 @@ def main():
 
         target_embeddings, ligand_embeddings, cosine_similarities = get_balm_embeddings(targets, smiles, target_tokenizer, ligand_tokenizer, model)
         
-        print("Target embeddings:", target_embeddings[:10])
-        print("Ligand embeddings:", ligand_embeddings[:10])
-        print("Cosine similarities:", cosine_similarities[:10])
-
-        print("Target embeddings shape:", target_embeddings.shape)
-        print("Ligand embeddings shape:", ligand_embeddings.shape)
-        print("Cosine similarities shape:", cosine_similarities.shape)
-        
         if args.embedding_type == "BALM-ligand":
             X = ligand_embeddings
         if args.embedding_type == "BALM-concat":
