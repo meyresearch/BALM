@@ -112,8 +112,8 @@ def get_balm_embeddings(targets_list, ligands_list, target_tokenizer, ligand_tok
         batch_ligands = ligands_list[i:i + batch_size]
         
         # Tokenize the batch
-        target_inputs = target_tokenizer(batch_targets, return_tensors="pt", padding=True, truncation=True).to("cpu")
-        ligand_inputs = ligand_tokenizer(batch_ligands, return_tensors="pt", padding=True, truncation=True).to("cpu")
+        target_inputs = target_tokenizer(batch_targets, return_tensors="pt", padding=True, truncation=True).to("cuda")
+        ligand_inputs = ligand_tokenizer(batch_ligands, return_tensors="pt", padding=True, truncation=True).to("cuda")
         
         # Prepare inputs for the model
         inputs = {
@@ -313,7 +313,7 @@ def main():
         # Load the model
         model = BALM(configs.model_configs)
         model = load_trained_model(model, configs.model_configs, is_training=False)
-        model.to("cpu")
+        model.to("cuda")
 
         # Load the tokenizers
         target_tokenizer = AutoTokenizer.from_pretrained(
