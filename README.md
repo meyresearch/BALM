@@ -35,7 +35,7 @@ Check the dataset page to know more details about it!
 ## Training
 
 ```bash
-python scripts/train.py --config_filepath path/to/a/config_file
+python scripts/train.py --config_filepath path/to/config_file.yaml
 ```
 
 You can find config files in the [`configs`](configs/) folder.
