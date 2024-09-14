@@ -45,7 +45,7 @@ def argument_parser():
         "--embedding_type",
         type=str,
         required=True,
-        choices=["ECFP8", "ChemBERTa", "BALM-ligand", "BALM-target", "BALM-concat", "BALM-sum", "BALM-subtract", "BALM-cosine"],
+        choices=["ECFP8", "ChemBERTa", "BALM-ligand", "BALM-concat", "BALM-sum", "BALM-subtract", "BALM-cosine"],
         help="Type of embedding on which the GP is trained on",
     )
     parser.add_argument(
@@ -324,8 +324,6 @@ def main():
         )
 
         target_embeddings, ligand_embeddings, cosine_similarities = get_balm_embeddings(targets, smiles, target_tokenizer, ligand_tokenizer, model)
-        if args.embedding_type == "BALM-target":
-            X = target_embeddings
         if args.embedding_type == "BALM-ligand":
             X = ligand_embeddings
         if args.embedding_type == "BALM-concat":

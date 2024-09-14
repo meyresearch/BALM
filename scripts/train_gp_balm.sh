@@ -1,7 +1,7 @@
 #!/bin/bash
 
 datasets=("Mpro" "USP7" "CATS" "HSP90" "HIF2A" "MCL1" "SYK")
-embedding_types=("BALM-ligand" "BALM-target" "BALM-concat" "BALM-sum" "BALM-subtract" "BALM-cosine")
+embedding_types=("BALM-ligand" "BALM-concat" "BALM-sum" "BALM-subtract" "BALM-cosine")
 test_sizes=(0.9 0.8 0.7)
 random_seeds=(1234 123 12)
 lr=0.1
