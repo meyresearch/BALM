@@ -128,9 +128,9 @@ def get_balm_embeddings(targets_list, ligands_list, target_tokenizer, ligand_tok
             predictions = model(inputs)
         
         # Collect results
-        protein_embeddings += [embedding.squeeze().detach().numpy() for embedding in predictions["protein_embedding"]]
-        drug_embeddings += [embedding.squeeze().detach().numpy() for embedding in predictions["drug_embedding"]]
-        cosine_similarities += [cos_sim.squeeze().detach().numpy() for cos_sim in predictions["cosine_similarity"]]
+        protein_embeddings += [embedding.squeeze().detach().cpu().numpy() for embedding in predictions["protein_embedding"]]
+        drug_embeddings += [embedding.squeeze().detach().cpu().numpy() for embedding in predictions["drug_embedding"]]
+        cosine_similarities += [cos_sim.squeeze().detach().cpu().numpy() for cos_sim in predictions["cosine_similarity"]]
     
     return protein_embeddings, drug_embeddings, cosine_similarities
 
