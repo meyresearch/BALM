@@ -5,9 +5,6 @@ import sys
 sys.path.append(os.getcwd())
 
 from dotenv import load_dotenv
-
-load_dotenv(".env")
-
 import wandb
 import pandas as pd
 import numpy as np
@@ -32,6 +29,13 @@ from balm.models import BALM
 
 
 def argument_parser():
+    """
+    Parse the command line arguments for the script.
+
+    Returns:
+        argparse.Namespace: Parsed command-line arguments with options such as dataset path, embedding type,
+                            test size, learning rate, and number of epochs.
+    """
     parser = argparse.ArgumentParser(
         description="Train Gaussian Process models on ECFP8 and ChemBERTa embeddings."
     )
@@ -68,7 +72,15 @@ def argument_parser():
 
 
 def smiles_to_ecfp8_fingerprint(smiles_list):
-    """Convert SMILES to ECFP8 Morgan Fingerprints."""
+    """
+    Convert SMILES strings to ECFP8 Morgan Fingerprints.
+
+    Args:
+        smiles_list (list of str): A list of SMILES strings.
+
+    Returns:
+        np.ndarray: A NumPy array containing ECFP8 fingerprints for each SMILES.
+    """
     fingerprints = []
     morgan_gen = rdFingerprintGenerator.GetMorganGenerator(radius=4, fpSize=2048)
     for smi in smiles_list:
@@ -83,7 +95,17 @@ def smiles_to_ecfp8_fingerprint(smiles_list):
 
 
 def smiles_to_chemberta_embedding(smiles_list, tokenizer, model):
-    """Convert SMILES strings into ChemBERTa embeddings."""
+    """
+    Convert SMILES strings into ChemBERTa embeddings using a transformer model.
+
+    Args:
+        smiles_list (list of str): A list of SMILES strings.
+        tokenizer: Pre-trained ChemBERTa tokenizer.
+        model: Pre-trained ChemBERTa model.
+
+    Returns:
+        np.ndarray: A NumPy array of ChemBERTa embeddings for each SMILES.
+    """
     embeddings = []
     for smi in smiles_list:
         inputs = tokenizer(smi, return_tensors="pt", padding=True, truncation=True)
@@ -95,6 +117,20 @@ def smiles_to_chemberta_embedding(smiles_list, tokenizer, model):
 
 
 def get_balm_embeddings(targets_list, ligands_list, target_tokenizer, ligand_tokenizer, model, batch_size=128):
+    """
+    Compute BALM embeddings for protein targets and ligands in batches.
+
+    Args:
+        targets_list (list of str): List of protein target sequences.
+        ligands_list (list of str): List of ligand SMILES strings.
+        target_tokenizer: Tokenizer for the protein targets.
+        ligand_tokenizer: Tokenizer for the ligands (drugs).
+        model: BALM model used for generating embeddings.
+        batch_size (int): The size of batches to process.
+
+    Returns:
+        Tuple[np.ndarray, np.ndarray, np.ndarray]: Protein embeddings, ligand embeddings, and cosine similarities.
+    """
     # Prepare for batching
     protein_embeddings = []
     drug_embeddings = []
@@ -140,7 +176,19 @@ def get_balm_embeddings(targets_list, ligands_list, target_tokenizer, ligand_tok
 
 
 def split_data(X, y, smiles, test_size=0.8, seed=42):
-    """Split data into training and testing sets along with SMILES strings."""
+    """
+    Split data into training and testing sets, along with SMILES strings.
+
+    Args:
+        X (np.ndarray): Feature matrix.
+        y (np.ndarray): Target values.
+        smiles (list): SMILES strings for molecules.
+        test_size (float): Proportion of the data to include in the test set.
+        seed (int): Random seed for reproducibility.
+
+    Returns:
+        Tuple: Training and testing feature matrices, target values, and SMILES strings.
+    """
     X_train, X_test, y_train, y_test, smiles_train, smiles_test = train_test_split(
         X, y, smiles, test_size=test_size, random_state=seed
     )
@@ -150,38 +198,89 @@ def split_data(X, y, smiles, test_size=0.8, seed=42):
             torch.tensor(y_test, dtype=torch.float32),
             smiles_train, smiles_test)
 
-
+# GP and 
 class ExactGPModelECFP8(gpytorch.models.ExactGP):
+    """
+    Gaussian Process model for ECFP8 fingerprints using the Tanimoto kernel.
+
+    Args:
+        train_x (torch.Tensor): Training feature data.
+        train_y (torch.Tensor): Training target values.
+        likelihood: Gaussian likelihood for the GP model.
+    """
     def __init__(self, train_x, train_y, likelihood):
         super(ExactGPModelECFP8, self).__init__(train_x, train_y, likelihood)
         self.mean_module = gpytorch.means.ConstantMean()
         self.covar_module = gpytorch.kernels.ScaleKernel(TanimotoKernel())
 
     def forward(self, x):
+        """
+        Forward pass of the GP model.
+
+        Args:
+            x (torch.Tensor): Input features.
+
+        Returns:
+            gpytorch.distributions.MultivariateNormal: Predicted distribution over outputs.
+        """
         mean_x = self.mean_module(x)
         covar_x = self.covar_module(x)
         return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
 
 
 class ExactGPModelChemBERTa2(gpytorch.models.ExactGP):
+    """
+    Gaussian Process model for ChemBERTa embeddings using the RBF kernel.
+
+    Args:
+        train_x (torch.Tensor): Training feature data.
+        train_y (torch.Tensor): Training target values.
+        likelihood: Gaussian likelihood for the GP model.
+    """
     def __init__(self, train_x, train_y, likelihood):
         super(ExactGPModelChemBERTa2, self).__init__(train_x, train_y, likelihood)
         self.mean_module = gpytorch.means.ConstantMean()
         self.covar_module = gpytorch.kernels.ScaleKernel(RBFKernel())
 
     def forward(self, x):
+        """
+        Forward pass of the GP model.
+
+        Args:
+            x (torch.Tensor): Input features.
+
+        Returns:
+            gpytorch.distributions.MultivariateNormal: Predicted distribution over outputs.
+        """
         mean_x = self.mean_module(x)
         covar_x = self.covar_module(x)
         return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
 
 
 class ExactGPModelBALM(gpytorch.models.ExactGP):
+    """
+    Gaussian Process model for BALM embeddings using the RBF kernel.
+
+    Args:
+        train_x (torch.Tensor): Training feature data.
+        train_y (torch.Tensor): Training target values.
+        likelihood: Gaussian likelihood for the GP model.
+    """
     def __init__(self, train_x, train_y, likelihood):
         super(ExactGPModelBALM, self).__init__(train_x, train_y, likelihood)
         self.mean_module = gpytorch.means.ConstantMean()
         self.covar_module = gpytorch.kernels.ScaleKernel(RBFKernel())
 
     def forward(self, x):
+        """
+        Forward pass of the GP model.
+
+        Args:
+            x (torch.Tensor): Input features.
+
+        Returns:
+            gpytorch.distributions.MultivariateNormal: Predicted distribution over outputs.
+        """
         mean_x = self.mean_module(x)
         covar_x = self.covar_module(x)
         return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
@@ -190,7 +289,22 @@ class ExactGPModelBALM(gpytorch.models.ExactGP):
 def train_gp_model(
     X_train, y_train, X_test, y_test, smiles_test, model_class, learning_rate=0.1, epochs=50
 ):
-    """Train GP model and log to Weights & Biases."""
+    """
+    Train a Gaussian Process model and log training progress to Weights & Biases.
+
+    Args:
+        X_train (torch.Tensor): Training feature matrix.
+        y_train (torch.Tensor): Training target values.
+        X_test (torch.Tensor): Test feature matrix.
+        y_test (torch.Tensor): Test target values.
+        smiles_test (list): List of SMILES strings for the test set.
+        model_class (class): The class of the GP model to train.
+        learning_rate (float): Learning rate for the optimizer.
+        epochs (int): Number of training epochs.
+
+    Returns:
+        Tuple: RMSE, R-squared, Spearman correlation, and Pearson correlation.
+    """
     likelihood = gpytorch.likelihoods.GaussianLikelihood()
     model = model_class(X_train, y_train, likelihood)
 
@@ -249,11 +363,15 @@ def train_gp_model(
 
 
 def main():
+    """
+    Main function to load the dataset, train the model, and log results.
+    """
     args = argument_parser()
-    # Load dataset
 
+    # Load dataset
     data = load_dataset("BALM/BALM-benchmark", args.dataset, split="train").to_pandas()
 
+    # Initialize Weights & Biases logging
     wandb_entity = os.getenv("WANDB_ENTITY", "")
     wandb_project = os.getenv("WANDB_PROJECT_NAME", "")
 
