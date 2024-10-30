@@ -44,7 +44,9 @@ python scripts/train.py --config_filepath path/to/config_file.yaml
 
 You can find config files in the [`configs`](configs/) folder. Below are examples for training different models (BALM, BALM with PEFT and Baseline) on datasets we used in the study.
 
-### BindingDB training from scratch
+### Base model training
+
+#### BindingDB training from scratch
 
 To train BALM + PEFT on the BindingDB with random splits, you can run this config:
 
@@ -54,7 +56,7 @@ python scripts/train.py --config_filepath configs/random_seed_experiments/bindin
 
 In the paper, we reported the average metrics across multiple runs, and these individual runs are denoted by the suffix of the YAML file (e.g., `_1`, `_2`, or `_3`). The difference is only on the random seed value (e.g., `12`, `123`, `1234`). You can use configs corrensponding to other splits (cold target, cold drug and scaffold) and models (BALM or Baseline) from [`configs`](configs/random_seed_experiments/) folder.
 
-### LeakyPDB training from scratch
+#### LeakyPDB training from scratch
 
 Similar to the BindingDB training, the LeakyPDB with training with BALM model can be run using this config:
 
@@ -62,6 +64,27 @@ Similar to the BindingDB training, the LeakyPDB with training with BALM model ca
 python scripts/train.py --config_filepath configs/random_seed_experiments/leakypdb/esm_chemberta_proj_tuning_cosinemse_1.yaml
 ```
 
+### Zero-shot/Few-shot evaluation
+
+Once you have access to a pretrained BALM, you can evaluate it on a zero-shot or few-shot setting using the Mpro and/or USP7 data:
+
+Zero-shot:
+
+```bash
+python scripts/train.py --config_filepath configs/random_seed_experiments/mpro/esm_chemberta_proj_tuning_cosinemse_train0_1.yaml
+```
+
+Note that in the name it says `train0`, which indicates 0% training set. Within the config file, you can look for `train_ratio: 0.0`.
+
+On the other hand, if you want to fine tune the model in a few-shot manner:
+
+```bash
+python scripts/train.py --config_filepath configs/random_seed_experiments/mpro/esm_chemberta_proj_tuning_cosinemse_train10_1.yaml
+```
+
+Similar to the zero-shot config files, within the config file of the few-shot fine-tuning, you can look for `train_ratio` argument which should have a value greater than `0.0`.
+
+You can also evaluate using other data (e.g., USP7) by specifying the correct config file path.
 
 ## 💬 Feedback
 
