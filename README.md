@@ -5,7 +5,9 @@ BALM learns by optimizing the distance between protein and ligand embeddings in 
 We incorporate parameter-efficient fine-tuning methods in the BALM framework to adapt pretrained protein and ligand language models for binding prediction.
 
 🧬 Tutorial notebook to get started: [`few_shot_demo.ipynb`](scripts/notebooks/few_shot_demo.ipynb)
+
 📁 Huggingface Dataset: [`BALM-benchmark`](https://huggingface.co/datasets/BALM/BALM-benchmark)
+
 🧠 Pretrained models: [`BALM models`](https://huggingface.co/BALM)
 
 ## Setup
