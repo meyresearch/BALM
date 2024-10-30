@@ -32,7 +32,7 @@ model_configs:
       - value
   loss_function: cosine_mse
 dataset_configs:
-  dataset_name: UpdatedMpro
+  dataset_name: Mpro
   split_method: original
   train_ratio: 0.4
   harmonize_affinities_mode: max_affinity
