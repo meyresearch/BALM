@@ -42,25 +42,26 @@ Check the dataset page to know more details about it!
 python scripts/train.py --config_filepath path/to/config_file.yaml
 ```
 
-You can find config files in the [`configs`](configs/) folder.
+You can find config files in the [`configs`](configs/) folder. Below are examples for training different models (BALM, BALM with PEFT and Baseline) on datasets we used in the study.
 
-### BindingDB with Random Split training
+### BindingDB training from scratch
 
-To train BALM on the BindingDB with random splits, you can run this config:
+To train BALM + PEFT on the BindingDB with random splits, you can run this config:
 
 ```bash
 python scripts/train.py --config_filepath configs/random_seed_experiments/bindingdb_random/esm_lokr_chemberta_loha_cosinemse_1.yaml
 ```
 
-In the paper, we reported the average metrics across multiple runs, and these individual runs are denoted by the suffix of the YAML file (e.g., `_1`, `_2`, or `_3`). The difference is only on the random seed value (e.g., `12`, `123`, `1234`).
+In the paper, we reported the average metrics across multiple runs, and these individual runs are denoted by the suffix of the YAML file (e.g., `_1`, `_2`, or `_3`). The difference is only on the random seed value (e.g., `12`, `123`, `1234`). You can use configs corrensponding to other splits (cold target, cold drug and scaffold) and models (BALM or Baseline) from [`configs`](configs/random_seed_experiments/) folder.
 
-### LeakyPDB with Random Split training
+### LeakyPDB training from scratch
 
-Similar to the BindingDB training, the LeakyPDB with Random Split training can be run using this config:
+Similar to the BindingDB training, the LeakyPDB with training with BALM model can be run using this config:
 
 ```bash
-python scripts/train.py --config_filepath configs/random_seed_experiments/leakypdb/esm_lokr_chemberta_loha_cosinemse_1.yaml
+python scripts/train.py --config_filepath configs/random_seed_experiments/leakypdb/esm_chemberta_proj_tuning_cosinemse_1.yaml
 ```
+
 
 ## 💬 Feedback
 
@@ -82,4 +83,6 @@ To discuss commercial use of our models, reach us [via email](mailto:antonia.mey
 
 ## Contact us
 
+- Rohan Gorantla ([rohan.gorantla@ed.ac.uk](mailto:rohan.gorantla@ed.ac.uk))
+- Aryo Pradipta Gema ([aryo.gema@ed.ac.uk](mailto:aryo.gema@ed.ac.uk))
 - Antonia Mey ([antonia.mey@ed.ac.uk](mailto:antonia.mey@ed.ac.uk))
