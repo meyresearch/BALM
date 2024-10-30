@@ -1,9 +1,9 @@
 model_configs:
   protein_model_name_or_path: facebook/esm2_t30_150M_UR50D
   drug_model_name_or_path: "DeepChem/ChemBERTa-77M-MTR"
-  checkpoint_path: aryopg/bdb-r-esm-lokr-chemberta-loha-cosinemse
+  checkpoint_path: BALM/bdb-cleaned-r-esm-lokr-chemberta-loha-cosinemse
   model_hyperparameters:
-    learning_rate: 0.01
+    learning_rate: 0.1
     warmup_steps_ratio: 0.06
     protein_max_seq_len: 1024
     drug_max_seq_len: 512
@@ -34,10 +34,10 @@ model_configs:
 dataset_configs:
   dataset_name: UpdatedMpro
   split_method: original
-  train_ratio: 0.3
+  train_ratio: 0.2
   harmonize_affinities_mode: max_affinity
 training_configs:
-  random_seed: 12
+  random_seed: 123
   device: 0
   epochs: 50
   batch_size: 4
