@@ -15,7 +15,7 @@ model_configs:
   drug_peft_hyperparameters: null
   loss_function: baseline_mse
 dataset_configs:
-  dataset_name: BindingDB_Kd
+  dataset_name: BindingDB_filtered
   split_method: cold_drug
   harmonize_affinities_mode: max_affinity
 training_configs:

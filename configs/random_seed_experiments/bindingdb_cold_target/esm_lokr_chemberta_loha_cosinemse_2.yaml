@@ -30,7 +30,7 @@ model_configs:
       - value
   loss_function: cosine_mse
 dataset_configs:
-  dataset_name: BindingDB_Kd
+  dataset_name: BindingDB_filtered
   split_method: cold_target
   harmonize_affinities_mode: max_affinity
 training_configs:

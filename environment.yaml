@@ -35,4 +35,6 @@ dependencies:
     - peft
     - tokenizers==0.13.3
     - pydantic==1.10.12
-    - info-nce-pytorch
+    - rdkit
+    - gauche
+    - gpytorch

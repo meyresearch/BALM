@@ -2,8 +2,6 @@ from tdc.multi_pred import DTI
 
 from balm.datasets import (
     BindingDBDataset,
-    CATSDataset,
-    HSP9Dataset,
     LeakyPDBDataset,
     MproDataset,
     USP7Dataset,
@@ -11,30 +9,10 @@ from balm.datasets import (
 
 
 DATASET_MAPPING = {
-    "LeakyPDB": {
-        "filepath": "data/leaky_pdb.csv",
-        "class": LeakyPDBDataset,
-    },
-    "BindingDB_filtered": {
-        "filepath": "data/BindingDB_filtered.csv",
-        "class": BindingDBDataset
-    },
-    "Mpro": {
-        "filepath": "data/Mpro.csv",
-        "class": MproDataset
-    },
-    "USP7": {
-        "filepath": "data/USP7.csv",
-        "class": USP7Dataset
-    },
-    "HSP9": {
-        "filepath": "data/HSP9.csv",
-        "class": HSP9Dataset
-    },
-    "CATS": {
-        "filepath": "data/CATS.csv",
-        "class": CATSDataset
-    },
+    "LeakyPDB": LeakyPDBDataset,
+    "BindingDB_filtered": BindingDBDataset,
+    "Mpro": MproDataset,
+    "USP7": USP7Dataset,
 }
 
 
@@ -49,6 +27,6 @@ def get_dataset(dataset_name, harmonize_affinities_mode, *args, **kwargs):
             # Convert $K_d$ to $pKd$
             dataset.convert_to_log(form="binding")
     else:
-        dataset = DATASET_MAPPING[dataset_name]["class"](*args, filepath=DATASET_MAPPING[dataset_name]["filepath"], **kwargs)
+        dataset = DATASET_MAPPING[dataset_name](*args, **kwargs)
 
     return dataset
