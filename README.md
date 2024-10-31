@@ -4,13 +4,21 @@
 BALM learns by optimizing the distance between protein and ligand embeddings in a shared space using the cosine similarity metric that directly represents experimental binding affinity.
 We incorporate parameter-efficient fine-tuning methods in the BALM framework to adapt pretrained protein and ligand language models for binding prediction.
 
-🧬 Tutorial notebook to get started: [`few_shot_demo.ipynb`](scripts/notebooks/few_shot_demo.ipynb)
+![BALM_overview](figures/BALM_overview.png "BALM Overview")
 
-📁 Huggingface Dataset: [`BALM-benchmark`](https://huggingface.co/datasets/BALM/BALM-benchmark)
 
-🧠 Pretrained models: [`BALM models`](https://huggingface.co/BALM)
+## 🚀 **Quick Start**
 
-## Setup
+Get started with BALM using these tutorial notebooks:
+
+- 📘 **Few-shot learning** with zero- and few-shot settings: [few_shot_demo.ipynb](scripts/notebooks/few_shot_demo.ipynb)
+- 🧬 **Custom dataset usage**: [custom_data_demo.ipynb](scripts/notebooks/custom_data_demo.ipynb)
+
+Explore the dataset and pretrained models:
+- 📁 **Dataset**: [BALM-benchmark](https://huggingface.co/datasets/BALM/BALM-benchmark)
+- 🧠 **Pretrained Models**: [BALM models](https://huggingface.co/BALM)
+
+## 🛠️ **Setup**
 
 ### Create a conda environment (GPU)
 
@@ -44,7 +52,9 @@ We published our dataset via HuggingFace: https://huggingface.co/datasets/BALM/B
 The code will automatically download the data from this link accordingly.
 Check the dataset page to know more details about it!
 
-## Training
+## 🧪💻 **Training Models**
+
+Execute the following command to start training with a specific configuration file:
 
 ```bash
 python scripts/train.py --config_filepath path/to/config_file.yaml
@@ -98,7 +108,7 @@ You can also evaluate using other data (e.g., USP7) by specifying the correct co
 
 Found a bug or wanted to suggest something? Please reach out via the [GitHub issues](https://github.com/meyresearch/BALM/issues).
 
-## Citations
+## 📝 Citations
 
 If you find the BALM model and benchmark useful in your research, please cite our paper:
 
@@ -106,13 +116,13 @@ If you find the BALM model and benchmark useful in your research, please cite ou
 TBA
 ```
 
-## Licence 
+## 📜 Licence 
 
 See [LICENSE.md](LICENSE.md).
 
 To discuss commercial use of our models, reach us [via email](mailto:antonia.mey@ed.ac.uk).
 
-## Contact us
+## 📫 Contact us
 
 - Rohan Gorantla ([rohan.gorantla@ed.ac.uk](mailto:rohan.gorantla@ed.ac.uk))
 - Aryo Pradipta Gema ([aryo.gema@ed.ac.uk](mailto:aryo.gema@ed.ac.uk))
