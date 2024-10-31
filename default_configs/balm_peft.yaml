@@ -34,8 +34,9 @@ model_configs:
   pkd_lower_bound: 1.999999995657055
   pkd_upper_bound: 10.0
 dataset_configs:
-  dataset_name: BindingDB_c
+  dataset_name: BindingDB_filtered
   split_method: random
+  harmonize_affinities_mode: null
 training_configs:
   random_seed: 1234
   device: 0
