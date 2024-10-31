@@ -6,7 +6,7 @@ sys.path.append(os.getcwd())
 
 from dotenv import load_dotenv
 
-load_dotenv("env/.env")
+load_dotenv(".env")
 
 from balm import common_utils
 from balm.configs import Configs
