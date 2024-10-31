@@ -5,6 +5,9 @@ from balm.datasets import (
     LeakyPDBDataset,
     MproDataset,
     USP7Dataset,
+    HIF2ADataset,
+    MCL1Dataset,
+    SYKDataset,
 )
 
 
@@ -13,10 +16,13 @@ DATASET_MAPPING = {
     "BindingDB_filtered": BindingDBDataset,
     "Mpro": MproDataset,
     "USP7": USP7Dataset,
+    "HIF2A": HIF2ADataset,
+    "MCL1": MCL1Dataset,
+    "SYK": SYKDataset,
 }
 
 
-def get_dataset(dataset_name, harmonize_affinities_mode, *args, **kwargs):
+def get_dataset(dataset_name, harmonize_affinities_mode=None, *args, **kwargs):
     if dataset_name.startswith("DTI_"):
         dti_dataset_name = dataset_name.replace("DTI_", "")
         dataset = DTI(name=dti_dataset_name)
