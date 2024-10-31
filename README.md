@@ -51,17 +51,17 @@ You can find config files in the [`configs`](configs/) folder. Below are example
 To train BALM + PEFT on the BindingDB with random splits, you can run this config:
 
 ```bash
-python scripts/train.py --config_filepath configs/random_seed_experiments/bindingdb_random/esm_lokr_chemberta_loha_cosinemse_1.yaml
+python scripts/train.py --config_filepath configs/bindingdb_random/esm_lokr_chemberta_loha_cosinemse_1.yaml
 ```
 
-In the paper, we reported the average metrics across multiple runs, and these individual runs are denoted by the suffix of the YAML file (e.g., `_1`, `_2`, or `_3`). The difference is only on the random seed value (e.g., `12`, `123`, `1234`). You can use configs corrensponding to other splits (cold target, cold drug and scaffold) and models (BALM or Baseline) from [`configs`](configs/random_seed_experiments/) folder.
+In the paper, we reported the average metrics across multiple runs, and these individual runs are denoted by the suffix of the YAML file (e.g., `_1`, `_2`, or `_3`). The difference is only on the random seed value (e.g., `12`, `123`, `1234`). You can use configs corrensponding to other splits (cold target, cold drug and scaffold) and models (BALM or Baseline) from [`configs`](configs/) folder.
 
 #### LeakyPDB training from scratch
 
 Similar to the BindingDB training, the LeakyPDB with training with BALM model can be run using this config:
 
 ```bash
-python scripts/train.py --config_filepath configs/random_seed_experiments/leakypdb/esm_chemberta_proj_tuning_cosinemse_1.yaml
+python scripts/train.py --config_filepath configs/leakypdb/esm_chemberta_proj_tuning_cosinemse_1.yaml
 ```
 
 ### Zero-shot/Few-shot evaluation
@@ -71,7 +71,7 @@ Once you have access to a pretrained BALM, you can evaluate it on a zero-shot or
 Zero-shot:
 
 ```bash
-python scripts/train.py --config_filepath configs/random_seed_experiments/mpro/esm_chemberta_proj_tuning_cosinemse_train0_1.yaml
+python scripts/train.py --config_filepath configs/mpro/esm_chemberta_proj_tuning_cosinemse_train0_1.yaml
 ```
 
 Note that in the name it says `train0`, which indicates 0% training set. Within the config file, you can look for `train_ratio: 0.0`.
@@ -79,7 +79,7 @@ Note that in the name it says `train0`, which indicates 0% training set. Within 
 On the other hand, if you want to fine tune the model in a few-shot manner:
 
 ```bash
-python scripts/train.py --config_filepath configs/random_seed_experiments/mpro/esm_chemberta_proj_tuning_cosinemse_train10_1.yaml
+python scripts/train.py --config_filepath configs/mpro/esm_chemberta_proj_tuning_cosinemse_train10_1.yaml
 ```
 
 Similar to the zero-shot config files, within the config file of the few-shot fine-tuning, you can look for `train_ratio` argument which should have a value greater than `0.0`.
