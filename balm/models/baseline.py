@@ -30,7 +30,7 @@ class BaselineModel(BaseModel):
             model_configs, protein_embedding_size, drug_embedding_size
         )
 
-        # combined layers
+        # concatenating layers
         self.linear_projection = nn.Linear(
             self.protein_embedding_size + self.drug_embedding_size,
             model_configs.model_hyperparameters.projected_size,
