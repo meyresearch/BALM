@@ -1,0 +1,46 @@
+model_configs:
+  checkpoint_path: BALM/bdb-cleaned-r-esm-lokr-chemberta-loha-cosinemse
+  protein_model_name_or_path: facebook/esm2_t30_150M_UR50D
+  drug_model_name_or_path: "DeepChem/ChemBERTa-77M-MTR"
+  model_hyperparameters:
+    learning_rate: 0.001
+    warmup_steps_ratio: 0.06
+    protein_max_seq_len: 1024
+    drug_max_seq_len: 512
+    gradient_accumulation_steps: 32
+    projected_size: 256
+    projected_dropout: 0.3
+  protein_fine_tuning_type: lokr
+  protein_peft_hyperparameters:
+    r: 16
+    alpha: 32
+    rank_dropout: 0.0
+    module_dropout: 0.0
+    target_modules:
+      - key
+      - query
+      - value
+  drug_fine_tuning_type: loha
+  drug_peft_hyperparameters:
+    r: 16
+    alpha: 32
+    rank_dropout: 0.0
+    module_dropout: 0.0
+    target_modules:
+      - key
+      - query
+      - value
+  loss_function: cosine_mse
+  pkd_lower_bound: 1.999999995657055
+  pkd_upper_bound: 10.0
+dataset_configs:
+  dataset_name: BindingDB_filtered
+  split_method: random
+  harmonize_affinities_mode: null
+training_configs:
+  random_seed: 1234
+  device: 0
+  patience: 75
+  epochs: 150
+  batch_size: 8
+  outputs_dir: "outputs"

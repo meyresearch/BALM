@@ -17,7 +17,7 @@ class BaseModel(nn.Module):
         drug_embedding_size (int): The size of the drug model embeddings.
     """
 
-    def __init__(self, model_configs):
+    def __init__(self, model_configs, protein_embedding_size, drug_embedding_size):
         """
         Initializes the BaseModel with the given configuration.
 
@@ -44,12 +44,8 @@ class BaseModel(nn.Module):
 
         self._set_pooler_layer_to_trainable()
 
-        self.protein_embedding_size = self.protein_model_embedding_size.get(
-            model_configs.protein_model_name_or_path, protein_embedding_size
-        )
-        self.drug_embedding_size = self.drug_model_embedding_size.get(
-            model_configs.drug_model_name_or_path, drug_embedding_size
-        )
+        self.protein_embedding_size = protein_embedding_size
+        self.drug_embedding_size = drug_embedding_size
 
     def _set_pooler_layer_to_trainable(self):
         """

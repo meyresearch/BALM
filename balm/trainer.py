@@ -49,14 +49,18 @@ class Trainer:
         """
         self.configs = configs
 
+        self.dataset_configs = self.configs.dataset_configs
+        self.training_configs = self.configs.training_configs
+        self.model_configs = self.configs.model_configs
+
         self.gradient_accumulation_steps = (
-            self.configs.model_configs.model_hyperparameters.gradient_accumulation_steps
+            self.model_configs.model_hyperparameters.gradient_accumulation_steps
         )
         self.protein_max_seq_len = (
-            self.configs.model_configs.model_hyperparameters.protein_max_seq_len
+            self.model_configs.model_hyperparameters.protein_max_seq_len
         )
         self.drug_max_seq_len = (
-            self.configs.model_configs.model_hyperparameters.drug_max_seq_len
+            self.model_configs.model_hyperparameters.drug_max_seq_len
         )
 
         self.outputs_dir = outputs_dir
@@ -68,12 +72,12 @@ class Trainer:
 
         # Determine which model to use based on fine-tuning type
         if (
-            self.configs.model_configs.protein_fine_tuning_type == "baseline"
-            and self.configs.model_configs.drug_fine_tuning_type == "baseline"
+            self.model_configs.protein_fine_tuning_type == "baseline"
+            and self.model_configs.drug_fine_tuning_type == "baseline"
         ):
-            self.model = BaselineModel(self.configs.model_configs)
+            self.model = BaselineModel(self.model_configs)
         else:
-            self.model = BALM(self.configs.model_configs)
+            self.model = BALM(self.model_configs)
 
         self.train_dataloader = None
         self.valid_dataloader = None
@@ -89,10 +93,10 @@ class Trainer:
             Tuple: (protein_tokenizer, drug_tokenizer)
         """
         protein_tokenizer = AutoTokenizer.from_pretrained(
-            self.configs.model_configs.protein_model_name_or_path
+            self.model_configs.protein_model_name_or_path
         )
         drug_tokenizer = AutoTokenizer.from_pretrained(
-            self.configs.model_configs.drug_model_name_or_path
+            self.model_configs.drug_model_name_or_path
         )
 
         return protein_tokenizer, drug_tokenizer
@@ -109,9 +113,9 @@ class Trainer:
         self.pkd_upper_bound = max(dataset.y)
 
         # Load pKd bounds from a trained model if performing a zero-shot experiment
-        if self.configs.model_configs.checkpoint_path:
-            if self.configs.dataset_configs.train_ratio == 0.0:
-                self.pkd_lower_bound, self.pkd_upper_bound = load_pretrained_pkd_bounds(self.configs.model_configs.checkpoint_path)
+        if self.model_configs.checkpoint_path:
+            if self.dataset_configs.train_ratio == 0.0:
+                self.pkd_lower_bound, self.pkd_upper_bound = load_pretrained_pkd_bounds(self.model_configs.checkpoint_path)
         
         print(
             f"Scaling labels: from {self.pkd_lower_bound} - {self.pkd_upper_bound} to -1 to 1"
@@ -125,14 +129,14 @@ class Trainer:
         Returns:
             dict: Dictionary containing the dataset splits (train, valid, test).
         """
-        dataset = factories.get_dataset(self.configs.dataset_configs.dataset_name)
+        dataset = factories.get_dataset(self.dataset_configs.dataset_name, *args, **kwargs)
 
         print(
-            f"Training with {self.configs.model_configs.loss_function} loss function."
+            f"Training with {self.model_configs.loss_function} loss function."
         )
 
         # Apply pKd scaling if using cosine MSE loss
-        if self.configs.model_configs.loss_function == "cosine_mse":
+        if self.model_configs.loss_function == "cosine_mse":
             self.set_pkd_bounds(dataset)
 
             if self.pkd_upper_bound == self.pkd_lower_bound:
@@ -147,7 +151,7 @@ class Trainer:
                     for pkd in dataset.y
                 ]
             # Preprocess Y column for non-TDC datasets using the same pKd scaling
-            if not self.configs.dataset_configs.dataset_name.startswith("DTI_"):
+            if not self.dataset_configs.dataset_name.startswith("DTI_"):
                 if self.pkd_upper_bound == self.pkd_lower_bound:
                     dataset.data["Y"] = dataset.data["Y"].apply(lambda x: 0)
                 else:
@@ -157,7 +161,7 @@ class Trainer:
                         * 2
                         - 1
                     )
-        elif self.configs.model_configs.loss_function in ["baseline_mse"]:
+        elif self.model_configs.loss_function in ["baseline_mse"]:
             print("Using original pKd")
 
         # Filter the dataset by sequence length
@@ -166,7 +170,7 @@ class Trainer:
         print(f"Drug max length: {self.drug_max_seq_len}")
 
         dataset_splits = {}
-        for split, data_df in get_dataset_split(dataset).items():
+        for split, data_df in get_dataset_split(self.dataset_configs, self.training_configs, dataset).items():
             if data_df is None:
                 continue
             # Pre-tokenize unique ligands and proteins for this split
@@ -214,7 +218,7 @@ class Trainer:
                 dataset_splits["train"],
                 shuffle=True,
                 collate_fn=data_collator,
-                batch_size=self.configs.training_configs.batch_size,
+                batch_size=self.training_configs.batch_size,
                 pin_memory=True,
             )
         if "valid" in dataset_splits:
@@ -223,7 +227,7 @@ class Trainer:
                 dataset_splits["valid"],
                 shuffle=False,
                 collate_fn=data_collator,
-                batch_size=self.configs.training_configs.batch_size,
+                batch_size=self.training_configs.batch_size,
                 pin_memory=True,
             )
         print(f"Setup Test DataLoader")
@@ -231,7 +235,7 @@ class Trainer:
             dataset_splits["test"],
             shuffle=False,
             collate_fn=data_collator,
-            batch_size=self.configs.training_configs.batch_size,
+            batch_size=self.training_configs.batch_size,
             pin_memory=True,
         )
 
@@ -241,21 +245,21 @@ class Trainer:
         the dataset, split method, and model hyperparameters.
         """
         protein_peft_hyperparameters = (
-            self.configs.model_configs.protein_peft_hyperparameters
+            self.model_configs.protein_peft_hyperparameters
         )
-        drug_peft_hyperparameters = self.configs.model_configs.drug_peft_hyperparameters
+        drug_peft_hyperparameters = self.model_configs.drug_peft_hyperparameters
 
         # Group name depends on the dataset and split method
-        self.group_name = f"{self.configs.dataset_configs.dataset_name}_{self.configs.dataset_configs.split_method}"
+        self.group_name = f"{self.dataset_configs.dataset_name}_{self.dataset_configs.split_method}"
 
         # Run name depends on the fine-tuning type and other relevant hyperparameters
         hyperparams = []
-        hyperparams += [f"protein_{self.configs.model_configs.protein_fine_tuning_type}"]
+        hyperparams += [f"protein_{self.model_configs.protein_fine_tuning_type}"]
         if protein_peft_hyperparameters:
             for key, value in protein_peft_hyperparameters.items():
                 if key not in ["target_modules", "feedforward_modules"]:
                     hyperparams += [f"{key}_{value}"]
-        hyperparams += [f"drug_{self.configs.model_configs.drug_fine_tuning_type}"]
+        hyperparams += [f"drug_{self.model_configs.drug_fine_tuning_type}"]
         if drug_peft_hyperparameters:
             for key, value in drug_peft_hyperparameters.items():
                 if key not in ["target_modules", "feedforward_modules"]:
@@ -296,16 +300,16 @@ class Trainer:
                     if param.requires_grad
                     and "noise_sigma" not in name  # Handle Balanced MSE loss
                 ],
-                lr=self.configs.model_configs.model_hyperparameters.learning_rate,
+                lr=self.model_configs.model_hyperparameters.learning_rate,
             )
 
 
             # Setup learning rate scheduler
             num_training_steps = (
-                len(self.train_dataloader) * self.configs.training_configs.epochs
+                len(self.train_dataloader) * self.training_configs.epochs
             )
             warmup_steps_ratio = (
-                self.configs.model_configs.model_hyperparameters.warmup_steps_ratio
+                self.model_configs.model_hyperparameters.warmup_steps_ratio
             )
             self.lr_scheduler = get_linear_schedule_with_warmup(
                 optimizer=self.optimizer,
@@ -340,8 +344,8 @@ class Trainer:
             )
 
         # Load a trained model from checkpoint if specified
-        if self.configs.model_configs.checkpoint_path:
-            load_trained_model(self.model, self.configs.model_configs, is_training=self.train_dataloader is not None)
+        if self.model_configs.checkpoint_path:
+            load_trained_model(self.model, self.model_configs, is_training=self.train_dataloader is not None)
 
     def compute_metrics(self, labels, predictions):
         """
@@ -354,7 +358,7 @@ class Trainer:
         Returns:
             dict: Dictionary containing the computed metrics.
         """
-        if self.configs.model_configs.loss_function in [
+        if self.model_configs.loss_function in [
             "cosine_mse"
         ]:
             # Rescale predictions and labels back to the original pKd range
@@ -383,8 +387,8 @@ class Trainer:
             best_checkpoint_dir = None
         else:
             best_loss = 999999999
-            patience = self.configs.training_configs.patience
-            eval_train_every_n_epochs = self.configs.training_configs.epochs // 4
+            patience = self.training_configs.patience
+            eval_train_every_n_epochs = self.training_configs.epochs // 4
             epochs_no_improve = 0  # Initialize early stopping counter
             best_checkpoint_dir = ""
 
@@ -393,7 +397,7 @@ class Trainer:
                 if param.requires_grad:
                     print(name)
 
-            for epoch in range(self.configs.training_configs.epochs):
+            for epoch in range(self.training_configs.epochs):
                 self.model.train()
 
                 num_train_steps = len(self.train_dataloader)
@@ -468,7 +472,7 @@ class Trainer:
         self.accelerator.log(test_metrics, step=epoch)
 
         # For specific datasets, also save predictions for train and validation splits
-        if self.configs.dataset_configs.dataset_name == "BindingDB_filtered":
+        if self.dataset_configs.dataset_name == "BindingDB_filtered":
             train_metrics = self.test("train", save_prediction=True)
             self.accelerator.log(train_metrics, step=epoch)
             valid_metrics = self.test("valid", save_prediction=True)
@@ -527,12 +531,10 @@ class Trainer:
                 # Collect predictions and labels for metric computation
                 all_proteins += batch["protein_ori_sequences"]
                 all_drugs += batch["drug_ori_sequences"]
-                if self.configs.model_configs.loss_function in [
-                    "cosine_mse"
-                ]:
+                if self.model_configs.loss_function == "cosine_mse":
                     all_labels += [batch["labels"]]
                     all_predictions += [outputs["cosine_similarity"]]
-                elif self.configs.model_configs.loss_function in ["baseline_mse"]:
+                elif self.model_configs.loss_function == "baseline_mse":
                     all_labels += [batch["labels"]]
                     all_predictions += [outputs["logits"]]
 
@@ -555,7 +557,7 @@ class Trainer:
             df["protein"] = all_proteins
             df["drug"] = all_drugs
 
-            if self.configs.model_configs.loss_function in [
+            if self.model_configs.loss_function in [
                 "cosine_mse"
             ]:
                 pkd_range = self.pkd_upper_bound - self.pkd_lower_bound

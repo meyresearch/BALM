@@ -1,29 +1,19 @@
 import numpy as np
 import pandas as pd
 
+from datasets import load_dataset
+
 
 class LeakyPDBDataset:
-    def __init__(self, filepath="data/leaky_pdb.csv"):
-        self.filepath = filepath
-        self.data = pd.read_csv(filepath)
-
-        # Rename columns for consistency with TDC data
-        # smiles -> Drug
-        # seq -> Target
-        self.data = self.data.rename(
-            columns={"smiles": "Drug", "seq": "Target", "value": "Y"}
-        )
-
-        # for dGs
-        # self.data = self.data.rename(
-        #     columns={"smiles": "Drug", "seq": "Target"}
-        # )
+    def __init__(self):
+        self.data = load_dataset("BALM/BALM-benchmark", "LeakyPDB", split="train").to_pandas()
+        
+        self.y = self.data["Y"].values
 
         print(f"Total of original data: {len(self.data)}")
         # Remove rows where smiles is NaN
         self.data = self.data.dropna(subset=["Drug"]).reset_index(drop=True)
         print(f"Total after filtering: {len(self.data)}")
-        self.y = self.data["Y"].values
 
     def get_split(self, *args, **kwargs):
         """Create data splits based on 'new_split' column.

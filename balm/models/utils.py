@@ -1,8 +1,5 @@
-
 from typing import Tuple
-
 import os
-
 import torch
 from huggingface_hub import hf_hub_download
 
@@ -29,7 +26,7 @@ def load_trained_model(model: BaseModel, model_configs: ModelConfigs, is_trainin
     checkpoint_path = hf_hub_download(
         repo_id=model_configs.checkpoint_path,
         filename="pytorch_model.bin",
-        token=os.getenv("HF_DOWNLOAD_TOKEN"),
+        token=os.getenv("HF_TOKEN"),
     )
 
     # Load the checkpoint into memory and map it to the device of the model

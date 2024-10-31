@@ -3,6 +3,7 @@ from random import Random
 from typing import Dict
 
 import pandas as pd
+from datasets import load_dataset
 from rdkit import Chem
 from rdkit.Chem.Scaffolds import MurckoScaffold
 
@@ -67,27 +68,9 @@ def create_scaffold_split_dti(df, seed, frac, drug_column):
 
 
 class BindingDBDataset:
-    """
-    A class to represent the BindingDB dataset for drug-target interactions.
+    def __init__(self):
+        self.data = load_dataset("BALM/BALM-benchmark", "BindingDB_filtered", split="train").to_pandas()
 
-    Attributes:
-        filepath (str): The path to the BindingDB dataset CSV file.
-        data (pd.DataFrame): The processed dataset.
-        y (np.ndarray): The target values from the dataset.
-
-    Methods:
-        get_split(method, frac, seed, column_name): Returns the dataset split according to the specified method.
-    """
-
-    def __init__(self, filepath="data/BindingDB_filtered.csv"):
-        """
-        Initialize the BindingDBDataset object by loading and processing the dataset.
-
-        Args:
-            filepath (str): The path to the dataset file.
-        """
-        self.filepath = filepath
-        self.data = pd.read_csv(filepath)
         self.data = self.data.dropna(subset=["Drug"]).reset_index(drop=True)
         self.y = self.data["Y"].values
         self.data = (

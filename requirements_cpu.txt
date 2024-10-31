@@ -1,0 +1,58 @@
+# Core Python Libraries and Versions
+numpy==1.23.5
+scipy==1.9.3
+pandas==2.0.1
+
+# PyTorch for CPU
+torch
+torchvision
+torchaudio
+# Hugging Face Libraries
+transformers
+datasets
+huggingface-hub
+tokenizers
+evaluate
+sentencepiece
+
+# Deep Learning and Optimization Libraries
+accelerate
+deepspeed
+peft
+gpytorch
+pydantic
+
+# Additional Utilities
+python-dotenv
+black
+isort
+tqdm
+wandb
+fsspec
+aiohttp
+grpcio
+matplotlib
+seaborn
+statannotations
+joblib
+
+# Machine Learning Libraries
+scikit-learn
+biopython
+deepchem
+
+# Chemistry and Data Handling Libraries
+rdkit
+pytdc
+
+# Jupyter and Notebook Extensions
+jupyter
+jupyterlab
+ipywidgets
+
+# Optional Utilities and Framework Support
+bokeh
+aiohttp
+requests
+protobuf
+xmltodict
