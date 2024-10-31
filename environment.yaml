@@ -10,7 +10,6 @@ dependencies:
   - pytorch
   - torchvision
   - torchaudio
-  - cudatoolkit=11.4
   - transformers
   - datasets
   - huggingface_hub
