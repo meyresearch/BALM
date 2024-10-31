@@ -12,11 +12,19 @@ We incorporate parameter-efficient fine-tuning methods in the BALM framework to 
 
 ## Setup
 
-### Create a conda environment
+### Create a conda environment (GPU)
 
 ```bash
 conda env create -f environment.yaml
 conda activate balm
+```
+
+### Create a conda environment (CPU)
+
+```bash
+conda create -n BALM python=3.10
+conda activate balm
+pip install -r requirements_cpu.txt
 ```
 
 ### Create an environment file
