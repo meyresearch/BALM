@@ -1,8 +1,7 @@
-# BALM: Binding Affinity Predictions with Protein and Ligand Language Models
+# Learning Binding Affinities via Fine-tuning of Protein and Ligand Language Models
 
-**BALM** is a sequence-based deep learning framework for predicting **b**inding **a**ffinity using pretrained protein and ligand **l**anguage **m**odels.
-BALM learns by optimizing the distance between protein and ligand embeddings in a shared space using the cosine similarity metric that directly represents experimental binding affinity.
-We incorporate parameter-efficient fine-tuning methods in the BALM framework to adapt pretrained protein and ligand language models for binding prediction.
+Accurate *in-silico* prediction of protein-ligand binding affinity is essential for efficient hit identification in large molecular libraries. Commonly used structure-based methods such as giga-docking often fail to rank compounds effectively, and free energy-based approaches, while accurate, are too computationally intensive for large-scale screening. Existing deep learning models struggle to generalize to new targets or drugs, and current evaluation methods do not reflect real-world performance accurately.
+We introduce **BALM**, a deep learning framework that predicts **b**inding **a**ffinity using pretrained protein and ligand **l**anguage **m**odels. BALM learns experimental binding affinities by optimizing cosine similarity in a shared embedding space. We also propose improved evaluation strategies with diverse data splits and metrics to better assess model performance. Using the BindingDB dataset, BALM shows strong generalization to unseen drugs, scaffolds, and targets. It excels in few-shot scenarios for targets such as *USP7* and *Mpro*, outperforming traditional machine learning and docking methods, including AutoDock Vina. Adoption of the target-based evaluation methods proposed will allow for more stringent evaluation of machine learning-based scoring tools. Frameworks such as BALM show good performance, are computationally efficient, and highly adaptable within this evaluation framework, making it a practical tool for early-stage drug discovery screening.
 
 ![BALM_overview](figures/BALM_overview.png "BALM Overview")
 
