@@ -112,8 +112,16 @@ Found a bug or wanted to suggest something? Please reach out via the [GitHub iss
 If you find the BALM model and benchmark useful in your research, please cite our paper:
 
 ```
-TBA
+@article{Gorantla2024,
+  author = {Gorantla, Rohan and Gema, Aryo Pradipta and Yang, Ian Xi and Serrano-Morr{\'a}s, {\'A}lvaro and Suutari, Benjamin and Jim{\'e}nez, Jordi Ju{\'a}rez and Mey, Antonia S. J. S.},
+  title = {Learning Binding Affinities via Fine-tuning of Protein and Ligand Language Models},
+  year = {2024},
+  doi = {10.1101/2024.11.01.621495},
+  publisher = {Cold Spring Harbor Laboratory},
+  journal = {bioRxiv}
+}
 ```
+
 
 ## 📜 Licence 
 
