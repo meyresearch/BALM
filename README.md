@@ -132,6 +132,6 @@ See [LICENSE.md](LICENSE.md).
 
 ## 📫 Contact us
 
-- Rohan Gorantla ([rohan.gorantla@ed.ac.uk](mailto:rohan.gorantla@ed.ac.uk))
+- Rohan Gorantla ([gorantlarohan@gmail.com](mailto:gorantlarohan@gmail.com))
 - Aryo Pradipta Gema ([aryo.gema@ed.ac.uk](mailto:aryo.gema@ed.ac.uk))
 - Antonia Mey ([antonia.mey@ed.ac.uk](mailto:antonia.mey@ed.ac.uk))
