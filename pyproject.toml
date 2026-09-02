@@ -1,0 +1,106 @@
+[build-system]
+requires = [
+	"setuptools>=61.2",
+	"versioningit",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "balm"
+description = "Learning Binding Affinities via Fine-tuning of Protein and Ligand Language Models"
+readme = "README.md"
+authors = [
+    {name = "Rohan Gorantla", email = "rohan.gorantla@ed.ac.uk"},
+    {name = "Aryo Pradipta Gema", email = "aryo.gema@ed.ac.uk"},
+    {name = "Antonia Mey", email = "antonia.mey@ed.ac.uk"},
+]
+license = {text = "MIT"}
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Chemistry",
+]
+urls = {Homepage = "https://github.com/meyresearch/BALM"}
+requires-python = ">= 3.10"
+dependencies = [
+    # Core Python libraries and versions
+    "numpy",
+    "scipy",
+    "pandas",
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+test = [
+    # PyTorch
+    "torch",
+    "torchvision",
+    "torchaudio",
+    # Hugging Face Libraries
+    "transformers",
+    "datasets",
+    "huggingface-hub",
+    "tokenizers",
+    "evaluate",
+    "sentencepiece",
+    # Deep Learning and Optimization Libraries
+    "accelerate",
+    "deepspeed",
+    "peft",
+    "gpytorch",
+    "pydantic",
+    # Additional Utilities
+    "tqdm",
+    "wandb",
+    "fsspec",
+    "aiohttp",
+    "grpcio",
+    "matplotlib",
+    "seaborn",
+    "statannotations",
+    "joblib",
+    # Machine Learning Libraries
+    "scikit-learn",
+    "biopython",
+    "deepchem",
+    # Chemistry and Data Handling Libraries
+    "rdkit",
+    "pytdc",
+    # Jupyter and Notebook Extensions
+    "jupyter",
+    "jupyterlab",
+    "ipywidgets",
+    "python-dotenv",
+    # Other utils
+    "black",
+    "isort",
+    "bokeh",
+    "aiohttp",
+    "requests",
+    "protobuf",
+    "xmltodict",
+]
+
+[tool.setuptools]
+zip-safe = false
+include-package-data = true
+license-files = ["LICENSE"]
+
+[tool.setuptools.packages]
+find = {namespaces = false}
+
+[tool.versioningit]
+default-version = "1+unknown"
+
+[tool.versioningit.format]
+distance = "{base_version}+{distance}.{vcs}{rev}"
+dirty = "{base_version}+{distance}.{vcs}{rev}.dirty"
+distance-dirty = "{base_version}+{distance}.{vcs}{rev}.dirty"
+
+[tool.versioningit.vcs]
+method = "git" 
+match = ["*"]
+default-tag = "0.0.0"
